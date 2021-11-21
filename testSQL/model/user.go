@@ -58,3 +58,56 @@ func (user *User) AddUser2() error  {
 	}
 	return nil
 }
+
+// GetUserById
+/* @Description:
+*  @receiver user
+*  @return *User
+*  @return error
+*/
+func (user *User) GetUserById() (*User, error)  {
+	//1、写sql语句
+	sqlStr := "select id, username, password,email from users where id = ?"
+	//2、执行，获取一条数据
+	row := utils.Db.QueryRow(sqlStr, user.ID)
+	//3、声明变量
+	u := &User{}
+	//4、将查询结果保存至指定参数
+	err := row.Scan(&u.ID, &u.UserName, &u.PassWord, &u.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+// GetUsers
+/* @Description: 获取数据库多条信息
+*  @receiver user
+*  @return []
+*  @return error
+*/
+func (user *User) GetUsers() ([] *User, error) {
+	//1、sql语句
+	sqlStr := "select * from users"
+	//2、执行
+	rows, err := utils.Db.Query(sqlStr)
+	if err != nil {
+		fmt.Println("获取User信息失败：", err)
+		return nil, err
+	}
+	//3、循环获取数据
+	var users []*User
+	for rows.Next() {
+		//将查询结果保存至指定参数
+		u := &User{}
+		err := rows.Scan(&u.ID, &u.UserName, &u.PassWord, &u.Email)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	return users, nil
+}
