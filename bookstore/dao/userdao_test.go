@@ -58,11 +58,11 @@ func TestSaveUser(t *testing.T) {
 //	DelBook(id)
 //}
 
-func TestGetBookById(t *testing.T) {
-	id := 3
-	b,_ := GetBookById(id)
-	fmt.Println(b)
-}
+//func TestGetBookById(t *testing.T) {
+//	id := 3
+//	b,_ := GetBookById(id)
+//	fmt.Println(b)
+//}
 
 //func TestUpdateBookById(t *testing.T) {
 //	b := &model.Book{
@@ -87,7 +87,7 @@ func TestGetBookById(t *testing.T) {
 //	fmt.Println(page)
 //}
 
-func TestGetPageBooksByPrice(t *testing.T) {
+/*func TestGetPageBooksByPrice(t *testing.T) {
 	pageno := "2"
 	pagesize := "5"
 	minprice := "100"
@@ -97,4 +97,29 @@ func TestGetPageBooksByPrice(t *testing.T) {
 		fmt.Println(v)
 	}
 	fmt.Println(page)
+}*/
+
+/*
+func TestAddSession(t *testing.T) {
+	s := model.Session{
+		"asdsd",
+		"zhizhi",
+		17,
+	}
+	err := AddSession(&s)
+	fmt.Println(err)
+}*/
+
+/*func TestDelBook(t *testing.T) {
+	sessionId := "asdsd"
+	err := DelSessionBySessionId(sessionId)
+	fmt.Println(err)
+}
+*/
+
+func TestGetSessionBySessionId(t *testing.T) {
+	sid := "756ebf9c-4cb8-4214-4eb5-e1b751fec581"
+	session, err := GetSessionBySessionId(sid)
+	fmt.Println("session :" , session)
+	fmt.Println("err: ", err)
 }

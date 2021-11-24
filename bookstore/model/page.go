@@ -7,6 +7,7 @@ type Page struct {
 	Pages int64		//总页数
 	Count int64		//总记录条数
 	Username string	//管理员姓名
+	IsLogin bool	//是否登陆
 }
 
 // IsHasPrev

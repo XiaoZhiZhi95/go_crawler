@@ -3,6 +3,7 @@ package main
 import (
 	"book/bookstore/controller"
 	"book/bookstore/dao"
+	"book/bookstore/utils"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -26,6 +27,13 @@ func handlerMain(w http.ResponseWriter, r *http.Request){
 		fmt.Println("获取图书信息失败：", err)
 	}
 
+	//获取cookie
+	session := utils.IsLogin(r, "user")
+	if session != nil {	//存在session，表示已登陆
+		page.IsLogin = true
+		page.Username = session.Username
+	}
+
 	t := template.Must(template.ParseFiles("views/myIndex.html"))
 	t.Execute(w, page)
 }
@@ -38,8 +46,13 @@ func main() {
 	//index.html页面,首页
 	http.HandleFunc("/main", handlerMain)
 
+	//登陆预处理，避免重复登陆
+	http.HandleFunc("/toLogin", controller.ToLogin)
 	//去登陆
 	http.HandleFunc("/login", controller.Login)
+
+	//去注销
+	http.HandleFunc("/logout", controller.Logout)
 
 	//去注册
 	http.HandleFunc("/register", controller.Register)

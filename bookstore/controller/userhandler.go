@@ -2,10 +2,28 @@ package controller
 
 import (
 	"book/bookstore/dao"
+	"book/bookstore/model"
+	"book/bookstore/utils"
 	"fmt"
 	"html/template"
 	"net/http"
 )
+
+// ToLogin
+/* @Description: 检验用户是否登陆，防止重复登陆
+*  @param w
+*  @param r
+*/
+func ToLogin(w http.ResponseWriter, r *http.Request)  {
+	session := utils.IsLogin(r, utils.CookieName)
+	if session != nil {
+		//重定向
+		http.Redirect(w, r, "/main", 302)
+	}else{
+		t := template.Must(template.ParseFiles("views/pages/user/logining.html"))
+		t.Execute(w, "")
+	}
+}
 
 // Login
 /* @Description: 处理用户登陆
@@ -25,6 +43,31 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 	if user != nil {
 		//用户名正确，则解析登陆成功的页面
 		fmt.Println("登陆成功")
+
+		//创建会话
+		uuid := utils.CreateUUID()
+		session := &model.Session{
+			uuid,
+			uname,
+			user.ID,
+		}
+		//保存cookie
+		errAddSession := dao.AddSession(session)
+		if errAddSession != nil {
+			//创建session失败
+			fmt.Println("创建session失败啦")
+		}else {
+			//创建cookie
+			cookie := http.Cookie{
+				Name: "user",
+				Value: uuid,
+				HttpOnly: true,
+			}
+
+			//发送cookie
+			http.SetCookie(w, &cookie)
+		}
+
 		t := template.Must(template.ParseFiles("views/pages/user/login_success.html"))
 		t.Execute(w, uname)
 	}else {
@@ -32,6 +75,32 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 		t := template.Must(template.ParseFiles("views/pages/user/login.html"))
 		t.Execute(w, "")
 	}
+}
+
+// Logout
+/* @Description: 注销
+*  @param w
+*  @param r
+*/
+func Logout(w http.ResponseWriter, r *http.Request)  {
+	//获取cookie
+	cookie,_ := r.Cookie("user")
+	if cookie != nil {
+		sessionId := cookie.Value
+
+		//删除数据库中对应的session
+		err := dao.DelSessionBySessionId(sessionId)
+		if err != nil {	//存在session，表示已登陆
+			fmt.Println("删除session失败：", err)
+		}
+
+		//设置cookie失效
+		cookie.MaxAge = -1
+		http.SetCookie(w, cookie)
+	}
+
+	//去首页
+	GetBooks(w, r)
 }
 
 // Register
