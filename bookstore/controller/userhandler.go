@@ -26,7 +26,7 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 		//用户名正确，则解析登陆成功的页面
 		fmt.Println("登陆成功")
 		t := template.Must(template.ParseFiles("views/pages/user/login_success.html"))
-		t.Execute(w, "")
+		t.Execute(w, uname)
 	}else {
 		fmt.Println("返回登陆页面")
 		t := template.Must(template.ParseFiles("views/pages/user/login.html"))
