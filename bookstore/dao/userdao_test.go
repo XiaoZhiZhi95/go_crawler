@@ -77,10 +77,22 @@ func TestGetBookById(t *testing.T) {
 //	UpdateBookById(b)
 //}
 
-func TestGetPageBooks(t *testing.T) {
+//func TestGetPageBooks(t *testing.T) {
+//	pageno := "2"
+//	pagesize := "5"
+//	page,_ := GetPageBooks(pageno, pagesize)
+//	for _, v := range page.Books{
+//		fmt.Println(v)
+//	}
+//	fmt.Println(page)
+//}
+
+func TestGetPageBooksByPrice(t *testing.T) {
 	pageno := "2"
 	pagesize := "5"
-	page,_ := GetPageBooks(pageno, pagesize)
+	minprice := "100"
+	maxPrice := "110"
+	page,_ := GetPageBooksByPrice(pageno, pagesize, minprice, maxPrice)
 	for _, v := range page.Books{
 		fmt.Println(v)
 	}

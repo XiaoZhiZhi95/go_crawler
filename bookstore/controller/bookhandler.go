@@ -126,3 +126,30 @@ func DeleteBook(w http.ResponseWriter, r *http.Request)  {
 
 	GetBooks(w, r)
 }
+
+// QueryPrice
+/* @Description: 查询价格分页数据
+*  @param w
+*  @param r
+*/
+func QueryPrice(w http.ResponseWriter, r *http.Request)  {
+	//解析当前页
+	requestPageNo := r.FormValue("PageNo")
+	if requestPageNo == ""{
+		requestPageNo = "1"
+	}
+	//Todo:判断入参合法性
+	requestMinPrice := r.FormValue("min")
+	requestMaxPrice := r.FormValue("max")
+
+	//获取分页数据
+	page, err :=dao.GetPageBooksByPrice(requestPageNo, "", requestMinPrice, requestMaxPrice)
+	if err != nil {
+		fmt.Println("获取图书信息失败：", err)
+	}
+
+	//解析模版文件
+	t := template.Must(template.ParseFiles("views/myIndex.html"))
+	//执行
+	t.Execute(w, page)
+}

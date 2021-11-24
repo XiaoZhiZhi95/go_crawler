@@ -2,6 +2,8 @@ package main
 
 import (
 	"book/bookstore/controller"
+	"book/bookstore/dao"
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -11,9 +13,21 @@ import (
 *  @param w
 *  @param r
 */
-func handlerIndex(w http.ResponseWriter, r *http.Request){
+func handlerMain(w http.ResponseWriter, r *http.Request){
+	//解析当前页
+	requestPageNo := r.FormValue("PageNo")
+	if requestPageNo == ""{
+		requestPageNo = "1"
+	}
+
+	//获取分页数据
+	page, err :=dao.GetPageBooks(requestPageNo, "")
+	if err != nil {
+		fmt.Println("获取图书信息失败：", err)
+	}
+
 	t := template.Must(template.ParseFiles("views/myIndex.html"))
-	t.Execute(w, "")
+	t.Execute(w, page)
 }
 
 func main() {
@@ -22,7 +36,7 @@ func main() {
 	http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("views/pages/"))))
 
 	//index.html页面,首页
-	http.HandleFunc("/main", handlerIndex)
+	http.HandleFunc("/main", handlerMain)
 
 	//去登陆
 	http.HandleFunc("/login", controller.Login)
@@ -44,6 +58,9 @@ func main() {
 
 	//删除图书
 	http.HandleFunc("/deleteBook", controller.DeleteBook)
+
+	//获取价格范围内的数据
+	http.HandleFunc("/queryPrice", controller.QueryPrice)
 
 	//监听端口
 	http.ListenAndServe(":8080", nil)

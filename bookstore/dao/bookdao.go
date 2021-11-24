@@ -79,6 +79,64 @@ func GetPageBooks(pageno string, pagesize string) (*model.Page, error) {
 	return &page, nil
 }
 
+// GetPageBooksByPrice
+/* @Description: 获取价格范围内带分页的图书信息
+*  @param pageno
+*  @param pagesize
+*  @param minPrice
+*  @param maxPrice
+*  @return *model.Page
+*  @return error
+*/
+func GetPageBooksByPrice(pageno string, pagesize string, minPrice string, maxPrice string) (*model.Page, error) {
+	var page model.Page
+
+	//设置每页的数量
+	if pagesize == "" {
+		pagesize = "4"
+	}
+	page.PageSize, _ = strconv.ParseInt(pagesize, 10, 0)
+	//当前页码
+	page.IndexPage, _ = strconv.ParseInt(pageno, 10, 0)
+	//最小价格
+	minP,_ := strconv.ParseFloat(minPrice, 64)
+	//最大价格
+	maxP,_ := strconv.ParseFloat(maxPrice, 64)
+
+	//计算价格范围内总量
+	sqlStr := "select count(1) from books where price between ? and ?"
+	row := utils.Db.QueryRow(sqlStr, minP, maxP)
+	row.Scan(&page.Count)
+
+	//计算总页数
+	temp := page.Count/page.PageSize
+	if page.Count%page.PageSize == 0{
+		page.Pages = temp
+	}else{
+		page.Pages = temp+1
+	}
+
+	//获取分页的数据
+	sqlStr = "select * from books where price between ? and ? limit ?, ?"
+	rows, err := utils.Db.Query(sqlStr,minP, maxP, (page.IndexPage - 1)*page.PageSize, page.PageSize)
+
+	var books []*model.Book
+	if err != nil {
+		fmt.Println("获取价格范围内带分页的数据失败:", err)
+	}else {
+		for rows.Next() {
+			b := &model.Book{}
+			rows.Scan(&b.ID, &b.Title, &b.Author, &b.Price, &b.Sales, &b.Stock, &b.ImgPath)
+
+			books = append(books, b)
+		}
+	}
+
+	page.Books = books
+
+	return &page, nil
+}
+
 // AddBook
 /* @Description: 添加图书
 *  @param b
