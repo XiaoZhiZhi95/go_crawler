@@ -3,11 +3,42 @@ package controller
 import (
 	"book/bookstore/dao"
 	"book/bookstore/model"
+	"book/bookstore/tools"
 	"book/bookstore/utils"
 	"fmt"
 	"html/template"
 	"net/http"
 )
+
+// handlerIndex
+/* @Description: 渲染index.html
+*  @param w
+*  @param r
+ */
+func HandlerMain(w http.ResponseWriter, r *http.Request){
+	//解析当前页
+	requestPageNo := r.FormValue("PageNo")
+	if requestPageNo == ""{
+		requestPageNo = "1"
+	}
+
+	//获取分页数据
+	page, err :=dao.GetPageBooks(requestPageNo, "")
+	if err != nil {
+		fmt.Println("获取图书信息失败：", err)
+	}
+
+	//获取cookie
+	session := tools.IsLogin(r, "user")
+	if session != nil {	//存在session，表示已登陆
+		page.IsLogin = true
+		page.Username = session.Username
+	}
+
+	t := template.Must(template.ParseFiles("views/myIndex.html"))
+	t.Execute(w, page)
+}
+
 
 // ToLogin
 /* @Description: 检验用户是否登陆，防止重复登陆
@@ -15,7 +46,7 @@ import (
 *  @param r
 */
 func ToLogin(w http.ResponseWriter, r *http.Request)  {
-	session := utils.IsLogin(r, utils.CookieName)
+	session := tools.IsLogin(r, utils.CookieName)
 	if session != nil {
 		//重定向
 		http.Redirect(w, r, "/main", 302)
@@ -45,7 +76,7 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 		fmt.Println("登陆成功")
 
 		//创建会话
-		uuid := utils.CreateUUID()
+		uuid := tools.CreateUUID()
 		session := &model.Session{
 			uuid,
 			uname,
@@ -100,7 +131,7 @@ func Logout(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	//去首页
-	GetBooks(w, r)
+	HandlerMain(w, r)
 }
 
 // Register

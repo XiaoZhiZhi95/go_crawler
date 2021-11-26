@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"book/bookstore/model"
+	"book/bookstore/tools"
 	"fmt"
 	"testing"
 )
@@ -117,9 +119,44 @@ func TestAddSession(t *testing.T) {
 }
 */
 
-func TestGetSessionBySessionId(t *testing.T) {
+/*func TestGetSessionBySessionId(t *testing.T) {
 	sid := "756ebf9c-4cb8-4214-4eb5-e1b751fec581"
 	session, err := GetSessionBySessionId(sid)
 	fmt.Println("session :" , session)
 	fmt.Println("err: ", err)
+}*/
+
+func TestAddCart(t *testing.T) {
+	book1 := &model.Book{
+		ID: 3,
+		Price: 44,
+	}
+	book2 := &model.Book{
+		ID: 4,
+		Price: 19,
+	}
+	uuid := tools.CreateUUID()
+	//创建两个购物项
+	cartItem1 := &model.CartItem{
+		Book: book1,
+		Count: 2,
+		CartId: uuid,
+	}
+	cartItem2 := &model.CartItem{
+		Book: book2,
+		Count: 2,
+		CartId: uuid,
+	}
+	//购物车
+	cart := &model.Cart{
+		CartId: uuid,
+		CartItems: []*model.CartItem{
+			cartItem1,
+			cartItem2,
+		},
+		UserId: 17,
+	}
+
+	err := AddCart(cart)
+	fmt.Println("创建购物车:", err)
 }

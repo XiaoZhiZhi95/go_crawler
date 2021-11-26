@@ -2,41 +2,8 @@ package main
 
 import (
 	"book/bookstore/controller"
-	"book/bookstore/dao"
-	"book/bookstore/utils"
-	"fmt"
-	"html/template"
 	"net/http"
 )
-
-// handlerIndex
-/* @Description: 渲染index.html
-*  @param w
-*  @param r
-*/
-func handlerMain(w http.ResponseWriter, r *http.Request){
-	//解析当前页
-	requestPageNo := r.FormValue("PageNo")
-	if requestPageNo == ""{
-		requestPageNo = "1"
-	}
-
-	//获取分页数据
-	page, err :=dao.GetPageBooks(requestPageNo, "")
-	if err != nil {
-		fmt.Println("获取图书信息失败：", err)
-	}
-
-	//获取cookie
-	session := utils.IsLogin(r, "user")
-	if session != nil {	//存在session，表示已登陆
-		page.IsLogin = true
-		page.Username = session.Username
-	}
-
-	t := template.Must(template.ParseFiles("views/myIndex.html"))
-	t.Execute(w, page)
-}
 
 func main() {
 	//设置静态资源
@@ -44,7 +11,7 @@ func main() {
 	http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("views/pages/"))))
 
 	//index.html页面,首页
-	http.HandleFunc("/main", handlerMain)
+	http.HandleFunc("/main", controller.HandlerMain)
 
 	//登陆预处理，避免重复登陆
 	http.HandleFunc("/toLogin", controller.ToLogin)
